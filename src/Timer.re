@@ -31,6 +31,14 @@ let formatTime = seconds => {
   minsString ++ ":" ++ secondsString;
 };
 
+let updateTitle: string => unit = [%bs.raw
+  {|
+  function updateTitle(remaining) {
+    document.title = "⏰ " + remaining + " ⏰";
+  }|}
+];
+
+
 [@react.component]
 let make = () => {
   let (state, dispatch) =
@@ -40,10 +48,14 @@ let make = () => {
         | Start => {...state, isTicking: true}
         | Stop => {...state, isTicking: false}
         | Reset => {...state, seconds: 30}
-        | Tick => state.isTicking && state.seconds > 0 ? {...state, seconds: state.seconds - 1}: state
+        | Tick => state.isTicking && state.seconds > 0
+        ? {
+          updateTitle(formatTime(state.seconds - 1));
+        {...state, seconds: state.seconds - 1};}
+        : state
         },
       // The second argument to useReducer is the initial state of the reducer.
-      {isTicking: true, seconds: 3},
+      {isTicking: false, seconds: 30},
     );
   // To update the timer every second, we need to create an effect.
   React.useEffect0(() => {
