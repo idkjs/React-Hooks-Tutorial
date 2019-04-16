@@ -16,6 +16,21 @@ type action =
   | Reset
   | Tick;
 
+let padNumber = numString =>
+  if (numString |> int_of_string < 10) {
+    "0" ++ numString;
+  } else {
+    numString;
+  };
+
+let formatTime = seconds => {
+  let mins = seconds / 60;
+  let minsString = mins |> string_of_int |> padNumber;
+  let seconds = seconds mod 60;
+  let secondsString = seconds |> string_of_int |> padNumber;
+  minsString ++ ":" ++ secondsString;
+};
+
 [@react.component]
 let make = () => {
   let (state, dispatch) =
@@ -36,10 +51,22 @@ let make = () => {
     Some(() => Js.Global.clearInterval(timerId));
   });
 
-  <div>
-    {ReasonReact.string(
-       "There are " ++ string_of_int(state.seconds) ++ " on the clock",
-     )}
+  <div style={ReactDOMRe.Style.make(
+      ~border="1px solid black",
+      ~borderRadius="8px",
+      ~maxWidth="180px",
+      ~textAlign="center",
+      (),
+    )}>
+    <p
+      style={ReactDOMRe.Style.make(
+        ~color="#444444",
+        ~fontSize="42px",
+        ~margin="16px 0",
+        (),
+      )}>
+      {state.seconds |> formatTime |> ReasonReact.string}
+    </p>
      {state.isTicking
         ? <Button label="STOP" onClick={_event => dispatch(Stop)} />
         : <>
